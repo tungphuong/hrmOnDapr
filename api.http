@@ -1,0 +1,6 @@
+POST {{apiUrl}}/api/employee HTTP/1.1
+Accept: application/json
+
+###
+GET {{apiUrl}}/api/employee/{{$guid}} HTTP/1.1
+Accept: application/json

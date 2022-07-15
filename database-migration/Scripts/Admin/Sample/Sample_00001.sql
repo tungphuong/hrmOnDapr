@@ -1,0 +1,2 @@
+INSERT INTO public.activity_audits("ActBy", "IP", "Browser") VALUES ('admin-test', '10.0.0.1', 'Mozilla/5.0');
+INSERT INTO public.activity_audits("ActBy", "IP", "Browser") VALUES ('admin-test', '10.0.0.2', 'Mozilla/5.0');

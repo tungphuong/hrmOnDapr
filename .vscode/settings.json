@@ -1,0 +1,10 @@
+{
+  "rest-client.environmentVariables": {
+    "local": {
+      "apiUrl": "http://localhost:5000"
+    },
+    "sandbox": {
+      
+    }
+  }
+}

@@ -1,0 +1,92 @@
+version: "3.4"
+
+services:
+  postgres:
+    environment:
+      - POSTGRES_HOST_AUTH_METHOD=trust
+  
+  pgadmin:
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@nomail.com
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-P@ssw0rd}
+
+  admin:
+    image: mcr.microsoft.com/dotnet/sdk:6.0    
+    environment:
+      - DOTNET_WATCH_RESTART_ON_RUDE_EDIT=true
+    volumes:
+      - ./admin/Admin.Api:/code    
+    working_dir: /code
+    command: ["dotnet", "watch", "run"]
+  
+  admin-seed:    
+    volumes:
+      - /mnt/c/Me/working/devops/elite-source-demo/database-migration:/code:ro    
+    working_dir: /code
+    environment:
+      - INCLUDE_SAMPLE_DATA=Y
+    command:
+      [
+        "./wait-for-it.sh",
+        "postgres:5432",
+        "--",
+        "dotnet",
+        "run",
+        "Host=postgres;Database=admin-db;Username=postgres;Password=",
+        "Admin",
+      ]
+
+  communication:
+    image: cosmtrek/air    
+    working_dir: /code
+    volumes:
+      - ./communication:/code
+
+  communication-dapr:
+    command:
+      [
+        "./daprd",
+        "-app-id",
+        "communication",
+        "-app-port",
+        "5101",
+        "-components-path",
+        "/components",
+      ]
+    volumes:
+      - "./dapr/components/:/components"
+
+  employee-management-dapr:
+    command:
+      [
+        "./daprd",
+        "-app-id",
+        "employee-management",
+        "-app-port",
+        "5102",
+        "-components-path",
+        "/components",
+      ]
+    volumes:
+      - "./dapr/components/:/components"
+
+  employee-management:
+    image: mcr.microsoft.com/dotnet/sdk:6.0    
+    environment:
+      - DOTNET_WATCH_RESTART_ON_RUDE_EDIT=true
+      - Services__Admin__Url=http://admin:5100
+      - Services__Communication__Url=http://communication:5101
+    volumes:
+      - ./building-blocks/EventBus:/code/building-blocks/EventBus
+      - ./employee-management/EmployeeManagement.Api:/code/employee-management/EmployeeManagement.Api
+    working_dir: /code/employee-management/EmployeeManagement.Api
+    command: ["dotnet", "watch", "run"]
+
+  api-gateway:
+    image: mcr.microsoft.com/dotnet/sdk:6.0    
+    environment:
+      - DOTNET_WATCH_RESTART_ON_RUDE_EDIT=true
+    volumes:
+      - ./api-gateway:/code
+    working_dir: /code
+    command: ["dotnet", "watch", "run"]

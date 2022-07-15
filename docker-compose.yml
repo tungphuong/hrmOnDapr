@@ -1,0 +1,124 @@
+version: "3.4"
+
+services:
+  maildev:
+    image: maildev/maildev
+    ports:
+      - 1080:1080
+      - 1025:1025
+    networks:
+      - backend
+
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq:3-management-alpine
+    restart: unless-stopped
+    networks:
+      - backend
+    ports:
+      - 5672:5672
+      - 15672:15672
+      - 15692:15692
+
+  postgres:
+    container_name: postgres
+    image: postgres:14-alpine
+    restart: always
+    networks:
+      - backend
+    ports:
+      - 5432:5432    
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4:6
+    restart: always
+    networks:
+      - backend
+    ports:
+      - 5433:80    
+    depends_on:
+      - postgres
+
+  admin-seed:
+    image: mcr.microsoft.com/dotnet/sdk:6.0    
+    depends_on:
+      - postgres  
+    networks:
+      - backend
+
+  admin:
+    ports:
+      - 5100:5100
+    depends_on:
+      - admin-seed
+    networks:
+      - backend
+
+  communication:
+    ports:
+      - 5101:5101
+    depends_on:
+      - rabbitmq
+      - maildev
+    networks:
+      - backend
+  
+  communication-dapr:
+    image: "daprio/daprd:1.7.2"
+    network_mode: "service:communication"
+    depends_on:
+      - communication
+
+  employee-management-dapr:
+    image: "daprio/daprd:1.7.2"
+    network_mode: "service:employee-management"
+    depends_on:
+      - employee-management
+
+  employee-management:
+    ports:
+      - 5102:5102
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:5102/healthz"]
+      interval: 1m30s
+      timeout: 30s
+      retries: 5
+      start_period: 30s
+    depends_on:      
+      - postgres
+      - rabbitmq
+    networks:
+      - backend
+  
+  api-gateway:
+    ports:
+      - 5000:5000
+    depends_on:
+      - admin
+      - employee-management
+      - communication
+    networks:
+      - backend
+      - frontend
+
+  ############################
+  # Dapr placement service
+  ############################
+  placement:
+    image: "daprio/dapr"
+    command: ["./placement", "-port", "50000", "-log-level", "debug"]
+    ports:
+      - "50000:50000"
+    networks:
+      - backend
+
+networks:
+  backend:
+  frontend:
+
+volumes:
+  pgdata:
+    driver: local
