@@ -21,7 +21,7 @@ services:
   
   admin-seed:    
     volumes:
-      - /mnt/c/Me/working/devops/elite-source-demo/database-migration:/code:ro    
+      - ./database-migration:/code:ro    
     working_dir: /code
     environment:
       - INCLUDE_SAMPLE_DATA=Y
