@@ -1,0 +1,81 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        # Update 'VARIANT' to pick a version of .NET: 3.1, 6.0
+        VARIANT: "6.0"
+        # Optional version of Node.js
+        NODE_VERSION: "none"
+
+    volumes:
+      - ..:/workspace:cached
+
+    # Overrides default command so things don't shut down after the process ends.
+    command: sleep infinity
+
+    # Runs app on the same network as the database container, allows "forwardPorts" in devcontainer.json function.
+    networks:      
+      - default
+  
+  postgres:
+    image: postgres:14.3
+    restart: unless-stopped
+    ports:
+      - 5432:5432
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_DB: postgres     
+      POSTGRES_HOST_AUTH_METHOD: trust 
+    networks:      
+      - default
+  
+  maildev:
+    image: maildev/maildev
+    ports:
+      - 1080:1080
+      - 1025:1025
+    networks:      
+      - default
+  
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq:3-management-alpine
+    restart: unless-stopped
+    networks:      
+      - default
+    ports:
+      - 5672:5672
+      - 15672:15672
+      - 15692:15692
+  
+  ############################
+  # Dapr placement service
+  ############################
+  placement:
+    image: "daprio/dapr"
+    command: ["./placement", "-port", "50000", "-log-level", "debug"]
+    ports:
+      - "50000:50000"
+    networks:      
+      - default
+  
+  zipkin:
+    image: openzipkin/zipkin
+    ports:
+      - 9411:9411
+    networks:      
+      - default
+
+networks:
+  default:
+    name: dapr-dev-container
+
+volumes:
+  postgres-data: null

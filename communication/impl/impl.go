@@ -1,6 +1,7 @@
 package impl
 
 import (
+	"communication/configs"
 	"context"
 	"log"
 
@@ -20,20 +21,25 @@ func Initialize(client dapr.Client) *CommunicationService {
 func (c *CommunicationService) SendEmail() error {
 	log.Default().Println("Sending email !!!")
 
-	ctx := context.Background()
+	if configs.EnableDapr() {
+		ctx := context.Background()
 
-	metaData := make(map[string]string)
-	metaData["emailFrom"] = "admin@nomail.com"
-	metaData["emailTo"] = "nomail@nomail.com"
-	metaData["subject"] = "Test send mail by Dapr."
+		metaData := make(map[string]string)
+		metaData["emailFrom"] = "admin@nomail.com"
+		metaData["emailTo"] = "nomail@nomail.com"
+		metaData["subject"] = "Test send mail by Dapr."
 
-	in := &dapr.InvokeBindingRequest{Name: "sendmail",
-		Operation: "create",
-		Metadata:  metaData,
-		Data:      []byte("hello")}
+		in := &dapr.InvokeBindingRequest{Name: "sendmail",
+			Operation: "create",
+			Metadata:  metaData,
+			Data:      []byte("hello")}
 
-	if err := c.client.InvokeOutputBinding(ctx, in); err != nil {
-		panic(err)
+		if err := c.client.InvokeOutputBinding(ctx, in); err != nil {
+			panic(err)
+		}
+	} else {
+		log.Default().Println("Sent email !!!")
 	}
+
 	return nil
 }

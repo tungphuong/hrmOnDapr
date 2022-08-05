@@ -1,6 +1,7 @@
 package main
 
 import (
+	"communication/configs"
 	"communication/impl"
 	"communication/spec"
 	"context"
@@ -26,28 +27,37 @@ var importantSubscription = &common.Subscription{
 }
 
 func main() {
-	// Set up Dapr client & checks for Dapr sidecar, otherwise die
-	daprClient, err := dapr.NewClient()
-	if err != nil {
-		log.Panicln("FATAL! Dapr process/sidecar NOT found. Terminating!")
-	}
-	defer daprClient.Close()
-
-	api := API{
-		communicationService: impl.Initialize(daprClient),
-	}
-
+	configs.Init()
 	router := mux.NewRouter()
-	api.addRoutes(router)
 
-	s := daprd.NewServiceWithMux(":5101", router)
+	if configs.EnableDapr() {
+		// Set up Dapr client & checks for Dapr sidecar, otherwise die
+		daprClient, err := dapr.NewClient()
+		if err != nil {
+			log.Panicln("FATAL! Dapr process/sidecar NOT found. Terminating!")
+		}
+		defer daprClient.Close()
 
-	if err := s.AddTopicEventHandler(importantSubscription, importantEventHandler); err != nil {
-		log.Fatalf("error adding topic subscription: %v", err)
-	}
+		api := API{
+			communicationService: impl.Initialize(daprClient),
+		}
+		api.addRoutes(router)
 
-	if err := s.Start(); err != nil && err != http.ErrServerClosed {
-		log.Fatalf("error: %v", err)
+		s := daprd.NewServiceWithMux(":5101", router)
+
+		if err := s.AddTopicEventHandler(importantSubscription, importantEventHandler); err != nil {
+			log.Fatalf("error adding topic subscription: %v", err)
+		}
+
+		if err := s.Start(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("error: %v", err)
+		}
+	} else {
+		api := API{
+			communicationService: impl.Initialize(nil),
+		}
+		api.addRoutes(router)
+		http.ListenAndServe(":5101", router)
 	}
 }
 
