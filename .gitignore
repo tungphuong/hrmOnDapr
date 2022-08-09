@@ -416,5 +416,6 @@ FodyWeavers.xsd
 
 # env file
 .env
+*.secrets
 
 tmp

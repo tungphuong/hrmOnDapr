@@ -1,0 +1,8 @@
+ARG NET_IMAGE=6.0-bullseye-slim
+FROM mcr.microsoft.com/dotnet/aspnet:${NET_IMAGE}
+WORKDIR /app
+EXPOSE 5100
+
+COPY ./publish .
+
+ENTRYPOINT ["dotnet", "Admin.Api.csproj"]

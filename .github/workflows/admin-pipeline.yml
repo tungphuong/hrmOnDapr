@@ -1,0 +1,79 @@
+name: Admin pipeline
+on:
+  push:
+    branches:
+    - main
+    
+    paths:
+    - admin/**
+    - building-blocks/**
+    - .github/workflows/admin-pipeline.yml
+  
+  pull_request:
+    branches:
+    - main
+    
+    paths:
+    - admin/**
+    - building-blocks/**
+    - .github/workflows/admin-pipeline.yml
+
+env:
+  DOTNET_VERSION: 6.0.x
+  IMAGE: admin.api
+  REGISTRY: ghcr.io
+
+jobs:
+  BuildLinux:
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout source code"
+        uses: actions/checkout@v3
+      
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v2.1.0
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+          include-prerelease: false
+      
+      - name: Build
+        run: |
+          cd admin/Admin.Api
+          mkdir publish
+          dotnet restore Admin.Api.csproj
+          dotnet publish --no-restore "Admin.Api.csproj" -c Release -o /publish
+      
+      - name: Run unittest
+        run: |
+          cd admin/Admin.UnitTests
+          dotnet test --verbosity normal /p:CollectCoverage=true /p:CoverletOutput=TestResults/ /p:CoverletOutputFormat=lcov
+      
+      - name: Run integration tests
+        run: |
+          cd admin/Admin.FunctionalTests
+          dotnet test --verbosity normal
+      
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          images: ${{ env.REGISTRY }}/${{env.GITHUB_REPOSITORY_OWNER}}/${{ env.IMAGE }}
+          tags: |
+            type=sha,enable=true,priority=100,prefix=,suffix=,format=short
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}      
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v3
+        with: 
+          context: ./admin/Admin.Api
+          file: ./admin/Admin.Api/Dockerfile.ci
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}             
+          labels: ${{ steps.meta.outputs.labels }}

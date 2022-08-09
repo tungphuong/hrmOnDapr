@@ -21,7 +21,8 @@
 				"jmrog.vscode-nuget-package-manager",
 				"oderwat.indent-rainbow",
 				"mutantdino.resourcemonitor",
-				"humao.rest-client"
+				"humao.rest-client",
+				"cschleiden.vscode-github-actions"
 			]
 		}
 	},
