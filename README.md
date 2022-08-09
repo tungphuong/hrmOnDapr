@@ -1,5 +1,7 @@
 # HRM on Dapr
 
+[![codecov](https://codecov.io/gh/tungphuong/hrmOnDapr/branch/main/graph/badge.svg?token=0K2DSKOFH4)](https://codecov.io/gh/tungphuong/hrmOnDapr)
+
 ![hrmOnDapr](docs/media/highlevel.png)
 
 The architecture consists of:

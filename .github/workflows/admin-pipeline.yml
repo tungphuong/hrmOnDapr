@@ -3,6 +3,7 @@ on:
   push:
     branches:
     - main
+    - feature/**
     
     paths:
     - admin/**
@@ -39,26 +40,38 @@ jobs:
       - name: Build
         run: |
           cd admin/Admin.Api
-          mkdir publish
+          mkdir ./publish
           dotnet restore Admin.Api.csproj
-          dotnet publish --no-restore "Admin.Api.csproj" -c Release -o /publish
+          dotnet publish --no-restore "Admin.Api.csproj" -c Release -o ./publish
       
-      - name: Run unittest
+      - name: Run unittests
         run: |
           cd admin/Admin.UnitTests
-          dotnet test --verbosity normal /p:CollectCoverage=true /p:CoverletOutput=TestResults/ /p:CoverletOutputFormat=lcov
+          dotnet test --verbosity normal /p:CollectCoverage=true /p:CoverletOutput=TestResults/ /p:CoverletOutputFormat=opencover
       
+      - name: Upload coverage to Codecov for unittests
+        uses: codecov/codecov-action@v3
+        with:
+          flags: unittests
+          directory: admin/Admin.UnitTests/TestResults
+
       - name: Run integration tests
         run: |
           cd admin/Admin.FunctionalTests
-          dotnet test --verbosity normal
+          dotnet test --verbosity normal /p:CollectCoverage=true /p:CoverletOutput=TestResults/ /p:CoverletOutputFormat=opencover
+      
+      - name: Upload coverage to Codecov for integration tests
+        uses: codecov/codecov-action@v3
+        with:
+          flags: integrationtests
+          directory: admin/Admin.FunctionalTests/TestResults
       
       - name: Docker meta
         id: meta
         uses: docker/metadata-action@v4
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          images: ${{ env.REGISTRY }}/${{env.GITHUB_REPOSITORY_OWNER}}/${{ env.IMAGE }}
+          images: ${{ env.REGISTRY }}/${{github.repository_owner}}/${{ env.IMAGE }}
           tags: |
             type=sha,enable=true,priority=100,prefix=,suffix=,format=short
 

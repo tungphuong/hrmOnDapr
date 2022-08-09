@@ -19,6 +19,7 @@
     <PackageReference Include="TestContainers.Container.Database.PostgreSql" Version="1.5.4"/>
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="6.0.6"/>
     <PackageReference Include="Testcontainers" Version="2.0.1"/>
+    <PackageReference Include="coverlet.msbuild" Version="3.1.2"/>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Admin.Api\Admin.Api.csproj"/>
