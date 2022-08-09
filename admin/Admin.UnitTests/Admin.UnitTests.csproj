@@ -17,10 +17,10 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="6.0.0"/>
-    <PackageReference Include="Microsoft.NETCore.Platforms" Version="6.0.0" />
+    <PackageReference Include="Microsoft.NETCore.Platforms" Version="6.0.0"/>
+    <PackageReference Include="coverlet.msbuild" Version="3.1.2"/>
   </ItemGroup>
-
   <ItemGroup>
-    <ProjectReference Include="..\Admin.Api\Admin.Api.csproj" />
+    <ProjectReference Include="..\Admin.Api\Admin.Api.csproj"/>
   </ItemGroup>
 </Project>
