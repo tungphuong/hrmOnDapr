@@ -1,0 +1,8 @@
+FROM golang:1.18.5-bullseye
+WORKDIR /app
+EXPOSE 5101
+
+COPY ./.env .
+COPY ./publish .
+
+ENTRYPOINT ["./communication"]

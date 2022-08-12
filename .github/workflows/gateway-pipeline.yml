@@ -1,26 +1,24 @@
-name: Admin pipeline
+name: Gateway pipeline
 on:
   push:
     branches:
     - main
     
     paths:
-    - admin/**
-    - building-blocks/**
-    - .github/workflows/admin-pipeline.yml
+    - api-gateway/**
+    - .github/workflows/gateway-pipeline.yml
   
   pull_request:
     branches:
     - main
     
     paths:
-    - admin/**
-    - building-blocks/**
-    - .github/workflows/admin-pipeline.yml
+    - api-gateway/**
+    - .github/workflows/gateway-pipeline.yml
 
 env:
   DOTNET_VERSION: 6.0.x
-  IMAGE: admin.api
+  IMAGE: gateway.api
   REGISTRY: ghcr.io
 
 jobs:
@@ -38,32 +36,10 @@ jobs:
       
       - name: Build
         run: |
-          cd admin/Admin.Api
+          cd api-gateway
           mkdir ./publish
-          dotnet restore Admin.Api.csproj
-          dotnet publish --no-restore "Admin.Api.csproj" -c Release -o ./publish
-      
-      - name: Run unittests
-        run: |
-          cd admin/Admin.UnitTests
-          dotnet test --verbosity normal /p:CollectCoverage=true /p:CoverletOutput=TestResults/ /p:CoverletOutputFormat=opencover
-      
-      - name: Upload coverage to Codecov for unittests
-        uses: codecov/codecov-action@v3
-        with:
-          flags: unittests
-          directory: admin/Admin.UnitTests/TestResults
-
-      - name: Run integration tests
-        run: |
-          cd admin/Admin.FunctionalTests
-          dotnet test --verbosity normal /p:CollectCoverage=true /p:CoverletOutput=TestResults/ /p:CoverletOutputFormat=opencover
-      
-      - name: Upload coverage to Codecov for integration tests
-        uses: codecov/codecov-action@v3
-        with:
-          flags: integrationtests
-          directory: admin/Admin.FunctionalTests/TestResults
+          dotnet restore ApiGateway.csproj
+          dotnet publish --no-restore "ApiGateway.csproj" -c Release -o ./publish            
       
       - name: Docker meta
         id: meta
@@ -86,8 +62,8 @@ jobs:
       - name: Build Docker image
         uses: docker/build-push-action@v3
         with: 
-          context: ./admin/Admin.Api
-          file: ./admin/Admin.Api/Dockerfile.ci
+          context: ./api-gateway
+          file: ./api-gateway/Dockerfile.ci
           push: true
           tags: ${{ steps.meta.outputs.tags }}             
           labels: ${{ steps.meta.outputs.labels }}
