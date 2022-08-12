@@ -22,7 +22,10 @@
 				"oderwat.indent-rainbow",
 				"mutantdino.resourcemonitor",
 				"humao.rest-client",
-				"cschleiden.vscode-github-actions"
+				"cschleiden.vscode-github-actions",
+				"donjayamanne.githistory",
+				"esbenp.prettier-vscode",
+				"hashicorp.terraform"
 			]
 		}
 	},
@@ -54,10 +57,21 @@
 	"remoteUser": "root",
 	"features": {
 		"docker-from-docker": "20.10",
-		"golang": "1.18"
+		"golang": "1.18",
+		"azure-cli": "latest",
+		"terraform": {
+			"version": "latest",
+			"tflint": "latest",
+			"terragrunt": "latest"
+		},
+		"kubectl-helm-minikube": {
+			"version": "latest",
+			"helm": "latest",
+			"minikube": "none"
+		}
 	},
 	"postCreateCommand": "dapr uninstall && dapr init --slim --network dapr-dev-container",
-	"remoteEnv":{
-		"ENABLE_DAPR": "true"		
+	"remoteEnv": {
+		"ENABLE_DAPR": "true"
 	}
 }
