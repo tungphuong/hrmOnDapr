@@ -3,6 +3,7 @@ on:
   push:
     branches:
     - main
+    - feature/**
     
     paths:
     - admin/**
@@ -70,11 +71,10 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          images: ${{ env.REGISTRY }}/${{github.repository_owner}}/${{ env.IMAGE }}
-          flavor: |
-            latest=auto
+          images: ${{ env.REGISTRY }}/${{github.repository_owner}}/${{ env.IMAGE }}          
           tags: |
             type=sha,enable=true,priority=100,prefix=,suffix=,format=short
+            type=raw,value=latest
 
       - name: Log in to the Container registry
         uses: docker/login-action@v2
