@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: employee-management
+spec:
+  ports:
+    - port: 5102
+      targetPort: 5102
+  selector:
+    app: employee-management
