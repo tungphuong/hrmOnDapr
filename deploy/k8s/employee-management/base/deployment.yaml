@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: employee-management
+spec:
+  template:
+    spec:
+      containers:
+        - name: employee-management
+          image: ghcr.io/tungphuong/employee-management.api:latest
+          resources:
+            limits:
+              cpu: "128m"
+              memory: "256M"
+          ports:
+            - containerPort: 80
+          env:
+            - name: ASPNETCORE_URLS
+              valueFrom:
+                configMapKeyRef:
+                  name: common-config-map
+                  key: ASPNETCORE_URLS
+            - name: ASPNETCORE_ENVIRONMENT
+              valueFrom:
+                configMapKeyRef:
+                  name: common-config-map
+                  key: ASPNETCORE_ENVIRONMENT

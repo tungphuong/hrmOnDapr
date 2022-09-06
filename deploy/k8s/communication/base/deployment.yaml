@@ -1,0 +1,16 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: communication
+spec:
+  template:
+    spec:
+      containers:
+        - name: communication
+          image: ghcr.io/tungphuong/communication.api:latest
+          resources:
+            limits:
+              memory: "128Mi"
+              cpu: "128m"
+          ports:
+            - containerPort: 5101

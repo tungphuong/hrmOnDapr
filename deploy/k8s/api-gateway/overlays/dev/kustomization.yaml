@@ -1,0 +1,38 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../base
+
+namespace: dev
+
+commonLabels:
+  env: dev
+
+patches:
+  - patch: |-
+      - op: add
+        path: /metadata/annotations
+        value:
+          kubernetes.io/ingress.class: addon-http-application-routing
+      - op: replace
+        path: /spec/rules/0/host
+        value: api-gateway.fdf1a2b0c54541269358.eastus.aksapp.io
+    target:
+      kind: Ingress
+      name: api-gateway
+
+  - patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: ReverseProxy__Clusters__admin-cluster__Destinations__default__Address
+          value: "http://admin/"
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: ReverseProxy__Clusters__employee-management-cluster__Destinations__default__Address
+          value: "http://employee-management/"
+    target:
+      kind: Deployment
+      name: api-gateway

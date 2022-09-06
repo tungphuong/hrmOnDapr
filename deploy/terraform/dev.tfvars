@@ -31,6 +31,7 @@ log_analytics = {
 aks = {
   base_name          = "hrmOnDapr"
   kubernetes_version = "1.23.8"
+  node_count         = 2
 }
 
 aks_resources = {

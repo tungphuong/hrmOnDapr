@@ -26,6 +26,7 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
   tags                = local.tags
   kubernetes_version  = var.kubernetes_version
   dns_prefix          = lower("${var.base_name}-aks")
+  http_application_routing_enabled = true
 
   default_node_pool {
     name           = "agentpool"

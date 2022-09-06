@@ -14,7 +14,8 @@ services:
     volumes:
       - ..:/workspace:cached
       - projectname-bashhistory:/commandhistory
-
+    dns:
+      - 1.1.1.1
     # Overrides default command so things don't shut down after the process ends.
     command: sleep infinity
 
@@ -77,7 +78,6 @@ services:
 networks:
   default:
     name: dapr-dev-container
-
 volumes:
   postgres-data: null  
   projectname-bashhistory:

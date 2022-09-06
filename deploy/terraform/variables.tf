@@ -55,6 +55,7 @@ variable "aks" {
   type = object({
     base_name          = string
     kubernetes_version = string
+    node_count         = number
   })
 }
 

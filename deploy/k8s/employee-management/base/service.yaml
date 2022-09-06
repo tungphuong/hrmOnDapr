@@ -4,7 +4,5 @@ metadata:
   name: employee-management
 spec:
   ports:
-    - port: 5102
-      targetPort: 5102
-  selector:
-    app: employee-management
+    - port: 80
+      targetPort: 80

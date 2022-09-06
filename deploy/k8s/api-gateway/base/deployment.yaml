@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-gateway
+spec:
+  template:
+    spec:
+      containers:
+        - name: api-gateway
+          image: ghcr.io/tungphuong/gateway.api:latest
+          env:
+            - name: ASPNETCORE_URLS
+              valueFrom:
+                configMapKeyRef:
+                  name: common-config-map
+                  key: ASPNETCORE_URLS
+            - name: ASPNETCORE_ENVIRONMENT
+              valueFrom:
+                configMapKeyRef:
+                  name: common-config-map
+                  key: ASPNETCORE_ENVIRONMENT
+          resources:
+            limits:
+              cpu: "128m"
+              memory: "256M"
+          ports:
+            - containerPort: 80

@@ -9,8 +9,39 @@ terraform {
       source  = "azure/azapi"
       version = "0.5.0"
     }
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = ">= 2.0.0"
+    }
+    kubectl = {
+      source  = "gavinbunney/kubectl"
+      version = ">= 1.7.0"
+    }
   }
   experiments = [module_variable_optional_attrs]
+}
+
+data "azurerm_kubernetes_cluster" "default" {
+  name                = module.aks_cluster.cluster_name
+  resource_group_name = azurerm_resource_group.default.name
+
+  depends_on = [
+    module.aks_cluster
+  ]
+}
+
+provider "kubernetes" {
+  host                   = data.azurerm_kubernetes_cluster.default.kube_config.0.host
+  client_certificate     = base64decode(data.azurerm_kubernetes_cluster.default.kube_config.0.client_certificate)
+  client_key             = base64decode(data.azurerm_kubernetes_cluster.default.kube_config.0.client_key)
+  cluster_ca_certificate = base64decode(data.azurerm_kubernetes_cluster.default.kube_config.0.cluster_ca_certificate)
+}
+
+provider "kubectl" {
+  host                   = data.azurerm_kubernetes_cluster.default.kube_config.0.host
+  client_certificate     = base64decode(data.azurerm_kubernetes_cluster.default.kube_config.0.client_certificate)
+  client_key             = base64decode(data.azurerm_kubernetes_cluster.default.kube_config.0.client_key)
+  cluster_ca_certificate = base64decode(data.azurerm_kubernetes_cluster.default.kube_config.0.cluster_ca_certificate)
 }
 
 provider "azurerm" {
@@ -22,6 +53,15 @@ provider "azurerm" {
 }
 
 provider "azapi" {
+}
+
+provider "helm" {
+  kubernetes {
+    host                   = data.azurerm_kubernetes_cluster.default.kube_config.0.host
+    client_certificate     = base64decode(data.azurerm_kubernetes_cluster.default.kube_config.0.client_certificate)
+    client_key             = base64decode(data.azurerm_kubernetes_cluster.default.kube_config.0.client_key)
+    cluster_ca_certificate = base64decode(data.azurerm_kubernetes_cluster.default.kube_config.0.cluster_ca_certificate)
+  }
 }
 
 locals {
@@ -94,22 +134,21 @@ module "postgresql_server" {
 }
 
 module "aks_cluster" {
-  source             = "./modules/aks"
-  base_name          = "${var.environment}-${var.aks.base_name}"
-  resource_group     = azurerm_resource_group.default.name
-  location           = var.az_setting.location
-  kubernetes_version = var.aks.kubernetes_version
-  vnet_subnet_id     = module.network.aks_node_pool_subnet_id
+  source                       = "./modules/aks"
+  base_name                    = "${var.environment}-${var.aks.base_name}"
+  resource_group               = azurerm_resource_group.default.name
+  location                     = var.az_setting.location
+  kubernetes_version           = var.aks.kubernetes_version
+  vnet_subnet_id               = module.network.aks_node_pool_subnet_id
+  default_node_pool_node_count = var.aks.node_count
 
   tags = local.tags
 }
 
 module "aks-resources" {
   source               = "./modules/aks-resources"
-  cluster_name         = module.aks_cluster.cluster_name
-  resource_group       = azurerm_resource_group.default.name
-  namespaces           = var.aks_resources.namespace
-  db_connection_string = module.postgresql_server.connection_string //azurerm_postgresql_flexible_server.default.fqdn
+  namespace            = var.aks_resources.namespace
+  db_connection_string = module.postgresql_server.connection_string
 }
 
 
