@@ -8,3 +8,7 @@ namespace: dev
 
 commonLabels:
   env: dev
+
+images:
+  - name: ghcr.io/tungphuong/communication.api
+    newTag: 6eb719a

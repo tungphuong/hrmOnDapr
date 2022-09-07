@@ -9,6 +9,10 @@ namespace: dev
 commonLabels:
   env: dev
 
+images:
+  - name: ghcr.io/tungphuong/gateway.api
+    newTag: 6eb719a
+
 patches:
   - patch: |-
       - op: add
