@@ -35,7 +35,10 @@ aks = {
 }
 
 aks_resources = {
-  namespace = "dev"
+  namespace         = "dev"
+  rabbitmq_password = "P@ssw0rd"
+  rabbitmq_user     = "user"
+  redis_password    = "P@ssw0rd"
 }
 
 container_apps = {

@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mailserver
+spec:
+  replicas: 1
+  template:
+    spec:
+      containers:
+        - name: mailserver
+          image: maildev/maildev
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+            - name: smtp
+              containerPort: 25
+              protocol: TCP
+      restartPolicy: Always

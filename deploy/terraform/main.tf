@@ -149,6 +149,9 @@ module "aks-resources" {
   source               = "./modules/aks-resources"
   namespace            = var.aks_resources.namespace
   db_connection_string = module.postgresql_server.connection_string
+  redis_password       = var.aks_resources.redis_password
+  rabbitmq_user        = var.aks_resources.rabbitmq_user
+  rabbitmq_password    = var.aks_resources.rabbitmq_password
 }
 
 

@@ -61,7 +61,10 @@ variable "aks" {
 
 variable "aks_resources" {
   type = object({
-    namespace = string
+    namespace         = string
+    redis_password    = string
+    rabbitmq_user     = string
+    rabbitmq_password = string
   })
 }
 
